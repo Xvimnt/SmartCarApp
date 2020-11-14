@@ -21,9 +21,7 @@ class _HomeState extends State<Home> {
             builder: (context) => AlertDialog(
                   content: ListTile(
                     title: Text(message['notification']['title']),
-                    subtitle: Text(message['notification']['body'] +
-                        ' peso: ' +
-                        this.weight),
+                    subtitle: Text(message['notification']['body']),
                   ),
                   backgroundColor: Colors.blue[100],
                   actions: <Widget>[
@@ -45,17 +43,14 @@ class _HomeState extends State<Home> {
 
   // Declaracion de los mensajes http
   void getData() async {
-    var response = await http.get('http://157.245.221.248:3000/getestados');
+    var response = await http.get('http://64.227.23.182:3000/infoed3');
     Map data = jsonDecode(response.body);
     // print(data);
-    this.state = data['estado'];
-    this.packets = data['total_paquetes'];
-    this.obstacles = data['obstaculos'];
-    this.position = data['position'];
-    this.weight = data['peso'];
-    this.averageWeight = data['peso_promedio'];
-    this.averageGoing = data['promedio_entrega'];
-    this.averageReturn = data['promedio_buzon'];
+    this.objeto = data['clean'];
+    this.usuario = data['temp_user'];
+    this.ambiente = data['temp_amb'];
+    this.warning = data['temp_ok'];
+    this.etapa = data['fase'];
   }
 
   void sendState(status) async {
@@ -65,22 +60,18 @@ class _HomeState extends State<Home> {
       'Accept': 'application/json'
     };
     Map data = {"status": status};
-    var response = await http.post('http://157.245.221.248:3000/movercarro',
+    var response = await http.post('http://64.227.23.182:3000/infoed3',
         body: jsonEncode(data), headers: requestHeaders);
     // Map data = jsonDecode(response.body);
     print(response.body);
   }
 
-  //Posicion 1 = partida, 2 = buzon, 3 = camino
-  // Estado 0 = en reposo, 1 = de ida (buzon), 2 = de regreso, 3 = detenido
-  String weight = '0',
-      averageWeight = '0',
-      averageGoing = '0',
-      averageReturn = '0',
-      state = '0',
-      packets = '0',
-      obstacles = '0',
-      position = '0';
+  // Objetos Desinfectados, Temperatura, Usuario, Visitas Semanales
+  String objeto = '0',
+      usuario = '0',
+      ambiente = '0',
+      warning = '0',
+      etapa = '0';
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +82,7 @@ class _HomeState extends State<Home> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Repartidor Inteligente'),
+        title: Text('Estacion Inteligente'),
         centerTitle: true,
         backgroundColor: Colors.blue[300],
       ),
@@ -100,60 +91,19 @@ class _HomeState extends State<Home> {
         padding: EdgeInsets.symmetric(vertical: 5, horizontal: 15),
         child: Column(
           children: <Widget>[
-            Text('Datos',
-                style: TextStyle(fontSize: 18, color: Colors.blue[500])),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      Column(
-                        children: <Widget>[
-                          Icon(
-                            Icons.location_searching,
-                            size: 40,
-                          ),
-                          Text('Ubicacion: ' + this.position)
-                        ],
-                      )
-                    ],
-                  ),
-                  Row(
-                    children: <Widget>[
-                      Column(
-                        children: <Widget>[
-                          Icon(
-                            Icons.local_car_wash,
-                            size: 40,
-                          ),
-                          Text('Estado: ' + this.state)
-                        ],
-                      )
-                    ],
-                  ),
-                ],
-              ),
+            Text(
+              'Etapa Actual:' + this.etapa,
+              style: TextStyle(fontSize: 18, color: Colors.blue[500]),
+            ),
+            Divider(
+              color: Colors.blue[300],
+              thickness: 3,
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      Column(
-                        children: <Widget>[
-                          Icon(
-                            Icons.check_box,
-                            size: 40,
-                          ),
-                          Text('Paquetes: ' + this.packets)
-                        ],
-                      )
-                    ],
-                  ),
                   Row(
                     children: <Widget>[
                       Column(
@@ -162,36 +112,7 @@ class _HomeState extends State<Home> {
                             Icons.category,
                             size: 40,
                           ),
-                          Text('Obstaculos: ' + this.obstacles)
-                        ],
-                      )
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            Divider(
-              color: Colors.blue[300],
-              thickness: 3,
-            ),
-            Text(
-              'Analisis',
-              style: TextStyle(fontSize: 18, color: Colors.blue[500]),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      Column(
-                        children: <Widget>[
-                          Icon(
-                            Icons.multiline_chart,
-                            size: 40,
-                          ),
-                          Text('Peso Promedio: ' + this.averageWeight)
+                          Text('Objetos: ' + this.objeto)
                         ],
                       )
                     ],
@@ -201,10 +122,10 @@ class _HomeState extends State<Home> {
                       Column(
                         children: <Widget>[
                           Icon(
-                            Icons.timer,
+                            Icons.accessibility,
                             size: 40,
                           ),
-                          Text('Promedio Ida: ' + this.averageGoing)
+                          Text('Temperatura: ' + this.usuario)
                         ],
                       )
                     ],
@@ -222,63 +143,29 @@ class _HomeState extends State<Home> {
                       Column(
                         children: <Widget>[
                           Icon(
-                            Icons.timer,
+                            Icons.ac_unit,
                             size: 40,
                           ),
-                          Text('Promedio Regreso: ' + this.averageReturn)
+                          Text('Ambiente: ' + this.ambiente)
                         ],
                       )
                     ],
                   ),
+                  Row(
+                    children: <Widget>[
+                      Column(
+                        children: <Widget>[
+                          Icon(
+                            Icons.ac_unit,
+                            size: 40,
+                          ),
+                          Text('Visitas Semanales: ' + this.ambiente)
+                        ],
+                      )
+                    ],
+                  )
                 ],
               ),
-            ),
-            Divider(
-              color: Colors.blue[300],
-              thickness: 3,
-            ),
-            Text(
-              'Funciones',
-              style: TextStyle(fontSize: 18, color: Colors.blue[500]),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    Column(
-                      children: <Widget>[
-                        IconButton(
-                          icon: Icon(Icons.play_arrow),
-                          color: Colors.blue[400],
-                          iconSize: 40,
-                          onPressed: () {
-                            sendState('1');
-                          },
-                        ),
-                        Text('Activar Carro')
-                      ],
-                    )
-                  ],
-                ),
-                Row(
-                  children: <Widget>[
-                    Column(
-                      children: <Widget>[
-                        IconButton(
-                          icon: Icon(Icons.pause),
-                          color: Colors.blue[400],
-                          iconSize: 40,
-                          onPressed: () {
-                            sendState('0');
-                          },
-                        ),
-                        Text('Desactivar Carro')
-                      ],
-                    )
-                  ],
-                ),
-              ],
             ),
           ],
         ),
